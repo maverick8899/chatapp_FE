@@ -26,11 +26,26 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
     - name: Build and push Docker image
-      env:
-        DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
       run: |
         COMMIT_SHA=${{ github.sha }}
         DATE=$(date +'%Y%m%d')
-        IMAGE_TAG="${{ env.DOCKER_HUB_USER }}/chatapp-frontend:${COMMIT_SHA}-${DATE}"
+        IMAGE_TAG="${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${COMMIT_SHA}-${DATE}"
         docker build . -t $IMAGE_TAG
         docker push $IMAGE_TAG
+  send_message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download GitHub Actions Logs
+        run: |
+          log_file="workflow_log.txt"
+          gh_run_id=${{ github.run_id }}
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs/${gh_run_id}/logs" \
+              -L -o $log_file
+
+      - name: Send Log File to Telegram
+        run: |
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TOKEN }}/sendDocument" \
+              -F chat_id=${{ secrets.CHAT_ID }} \
+              -F document=@./workflow_log.txt
