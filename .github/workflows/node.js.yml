@@ -32,6 +32,7 @@ jobs:
         IMAGE_TAG="${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${COMMIT_SHA}-${DATE}"
         docker build . -t $IMAGE_TAG
         docker push $IMAGE_TAG
+
   send_message:
     runs-on: ubuntu-latest
     steps:
@@ -46,6 +47,6 @@ jobs:
 
       - name: Send Log File to Telegram
         run: |
-          curl -X POST "https://api.telegram.org/bot${{ secrets.TOKEN }}/sendDocument" \
-              -F chat_id=${{ secrets.CHAT_ID }} \
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
+              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
               -F document=@./workflow_log.txt
