@@ -1,9 +1,11 @@
-name: Node.js CI
+name:  CICD
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '.'
   pull_request:
     branches: [ "main" ]
 
