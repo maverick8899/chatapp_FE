@@ -1,52 +1,57 @@
-name:  CICD
+name: CICD
 
 on:
-  push:
-    branches:
-      - main
-    # paths:
-    #   - '.'
-  pull_request:
-    branches: [ "main" ]
+    push:
+        branches:
+            - main
+    pull_request:
+        branches: ['main']
 
 jobs:
-  publish_images:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    publish_images:
+        runs-on: ubuntu-latest
+        env:
+            COMMIT_SHA: ${{ github.sha }}
+            DATE: $(date +'%Y%m%d')
+            IMAGE_TAG: ${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-${DATE}
+            SERVICE_NAME: chatapp-frontend
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_USER }}
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v1
 
-    - name: Build and push Docker image
-      run: |
-        COMMIT_SHA=${{ github.sha }}
-        DATE=$(date +'%Y%m%d')
-        IMAGE_TAG="${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${COMMIT_SHA}-${DATE}"
-        docker build . -t $IMAGE_TAG
-        docker push $IMAGE_TAG
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v1
+              with:
+                  username: ${{ secrets.DOCKER_HUB_USER }}
+                  password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-  send_message:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download GitHub Actions Logs
-        run: |
-          log_file="workflow_log.txt"
-          gh_run_id=${{ github.run_id }}
-          curl -H "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/runs/${gh_run_id}/logs" \
-              -L -o $log_file
+            - name: Build and push Docker image
+              run: |
+                  docker build . -t $IMAGE_TAG
+                  docker push $IMAGE_TAG
 
-      - name: Send Log File to Telegram
-        run: |
-          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
-              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-              -F document=@./workflow_log.txt
+            - name: Deploy
+              run: |
+                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} bang_tran@34.87.51.140 docker service update -d --image $IMAGE_TAG $SERVICE_NAME
+
+    # send_message:
+    #   runs-on: ubuntu-latest
+    #   steps:
+    #     - name: Download GitHub Actions Logs
+    #       run: |
+    #         log_file="workflow_log.txt"
+    #         gh_run_id=${{ github.run_id }}
+    #         curl -H "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
+    #             -H "Accept: application/vnd.github.v3+json" \
+    #             "https://api.github.com/repos/${{ github.repository }}/actions/runs/${gh_run_id}/logs" \
+    #             -L -o $log_file
+
+    #     - name: Send Log File to Telegram
+    #       run: |
+    #         curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
+    #             -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+    #             -F document=@./workflow_log.txt
