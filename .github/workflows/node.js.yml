@@ -43,7 +43,7 @@ jobs:
                 host: 34.87.51.140 #${{ secrets.HOST }}
                 username: bang_tran
                 key: ${{ secrets.SSH_PRIVATE_KEY }}
-                script: docker service update -d --image $IMAGE_TAG $SERVICE_NAME
+                script: docker service update -d --image ${{env.IMAGE_TAG}} ${{env.SERVICE_NAME}}
 
         # send_message:
         #   runs-on: ubuntu-latest
