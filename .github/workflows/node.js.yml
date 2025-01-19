@@ -34,7 +34,7 @@ jobs:
               env: 
                 DATE: $(date +'%Y%m%d')
                 IMAGE_TAG: ${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-${{ env.DATE }}
-                SERVICE_NAME: chatapp-frontend 
+                SERVICE_NAME: chatapp_frontend 
               # run: |
               #     echo "Deploying image: $IMAGE_TAG"
               #     ssh -i ${{ secrets.SSH_PRIVATE_KEY }} bang_tran@34.87.51.140 docker service update -d --image $IMAGE_TAG $SERVICE_NAME
