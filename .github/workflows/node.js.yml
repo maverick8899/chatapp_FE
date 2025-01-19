@@ -6,15 +6,15 @@ on:
             - main
     pull_request:
         branches: ['main']
+env:
+    COMMIT_SHA: ${{ github.sha }}
+    DATE: $(date +'%Y%m%d')
+    IMAGE_TAG: "${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-$DATE"
+    SERVICE_NAME: chatapp-frontend
 
 jobs:
     publish_images:
         runs-on: ubuntu-latest
-        env:
-            COMMIT_SHA: ${{ github.sha }}
-            DATE: $(date +'%Y%m%d')
-            IMAGE_TAG: "${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-$DATE"
-            SERVICE_NAME: chatapp-frontend
 
         steps:
             - name: Checkout repository
