@@ -13,7 +13,7 @@ jobs:
         env:
             COMMIT_SHA: ${{ github.sha }}
             DATE: $(date +'%Y%m%d')
-            IMAGE_TAG: ${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-${DATE}
+            IMAGE_TAG: ${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-$DATE
             SERVICE_NAME: chatapp-frontend
 
         steps:
