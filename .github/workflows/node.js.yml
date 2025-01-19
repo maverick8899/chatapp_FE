@@ -35,9 +35,15 @@ jobs:
                 DATE: $(date +'%Y%m%d')
                 IMAGE_TAG: ${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-${{ env.DATE }}
                 SERVICE_NAME: chatapp-frontend 
-              run: |
-                  echo "Deploying image: $IMAGE_TAG"
-                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} bang_tran@34.87.51.140 docker service update -d --image $IMAGE_TAG $SERVICE_NAME
+              # run: |
+              #     echo "Deploying image: $IMAGE_TAG"
+              #     ssh -i ${{ secrets.SSH_PRIVATE_KEY }} bang_tran@34.87.51.140 docker service update -d --image $IMAGE_TAG $SERVICE_NAME
+              uses: appleboy/ssh-action@v1.2.0
+              with:
+                host: 34.87.51.140 #${{ secrets.HOST }}
+                username: bang_tran
+                key: ${{ secrets.SSH_PRIVATE_KEY }}
+                script: docker service update -d --image $IMAGE_TAG $SERVICE_NAME
 
         # send_message:
         #   runs-on: ubuntu-latest
