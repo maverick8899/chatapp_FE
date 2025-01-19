@@ -13,7 +13,7 @@ jobs:
         env:
             COMMIT_SHA: ${{ github.sha }}
             DATE: $(date +'%Y%m%d')
-            IMAGE_TAG: "${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-${DATE}"
+            IMAGE_TAG: "${{ secrets.DOCKER_HUB_USER }}/chatapp-frontend:${{ github.sha }}-$DATE"
             SERVICE_NAME: chatapp-frontend
 
         steps:
@@ -31,12 +31,12 @@ jobs:
 
             - name: Build and push Docker image
               run: |
-                  docker build . -t ${IMAGE_TAG}
-                  docker push ${IMAGE_TAG}
+                  docker build . -t "$IMAGE_TAG"
+                  docker push "$IMAGE_TAG"
 
             - name: Deploy
               run: |
-                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} bang_tran@34.87.51.140 docker service update -d --image ${IMAGE_TAG} ${SERVICE_NAME}
+                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} bang_tran@34.87.51.140 docker service update -d --image "$IMAGE_TAG" "$SERVICE_NAME"
 
     # send_message:
     #   runs-on: ubuntu-latest
